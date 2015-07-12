@@ -1,6 +1,8 @@
 microunity/Library/*
+microunity/Temp/*
 microunity/*.sln
 microunity/*.csproj
+microunity/obj/*
 *.suo
 3rdParty/Lidgren.Network/Lidgren.Network/bin
 3rdParty/Lidgren.Network/Lidgren.Network/obj
