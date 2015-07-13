@@ -10,6 +10,8 @@ class Menu_Lobby : MonoBehaviour
     public void Start()
     {
         Session.Instance.RegisterChatDelegate(OnChatReceived);
+
+        ChatInputField.onEndEdit.AddListener(OnChatSubmit);
     }
 
     public void OnDestroy()
@@ -36,6 +38,16 @@ class Menu_Lobby : MonoBehaviour
             Application.LoadLevel("Menu_Connecting");
 
             this.enabled = false;
+        }
+    }
+
+    private void OnChatSubmit(string chat)
+    {
+        if (Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return))
+        {
+            SendChat();
+            ChatInputField.Select();
+            ChatInputField.ActivateInputField();
         }
     }
 
