@@ -52,6 +52,11 @@ public class RemotePlayerSet
         }
     }
 
+    public RemotePlayer GetPlayerInSlot(int slot)
+    {
+        return slots[slot];
+    }
+
     // Set the max number of available slots for players, additional players may connect as spectators, and will have a slot id of -1
     public void SetNumSlots(int num)
     {

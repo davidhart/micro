@@ -72,9 +72,14 @@ class PlayerIdentityGenerator
         Color.yellow
     };
 
-    public static Color PlayerIDToColor(long id)
+    public static Color unassignedColor = Color.gray;
+
+    public static Color PlayerSlotToColor(long slot)
     {
-        return colors[Mathf.Abs(id.GetHashCode()) % colors.Length];
+        if (slot < 0)
+            return unassignedColor;
+
+        return colors[slot % colors.Length];
     }
 
     public static string PlayerIDToName(long id)
@@ -87,6 +92,6 @@ class PlayerIdentityGenerator
 
     public static string PlayerIDToColorNameString(long id)
     {
-        return string.Format("<color=#{0}>{1}</color>", PlayerIDToColor(id).ToHexStringRGBA(), PlayerIDToName(id));
+        return string.Format("<color=#{0}>{1}</color>", PlayerSlotToColor(id).ToHexStringRGBA(), PlayerIDToName(id));
     }
 }

@@ -14,5 +14,6 @@ public enum ClientToServerMessageCategory
 {
     Chat = 0,
     GameMode = 1,
+    JoinSlot = 2,
     MAX
 }

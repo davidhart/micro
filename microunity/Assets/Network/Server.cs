@@ -192,6 +192,10 @@ public class Server
                 HandleChatMessage(msg);
                 break;
 
+            case ClientToServerMessageCategory.JoinSlot:
+                HandleAttemptToJoinSlot(msg);
+                break;
+
             default:
                 log(string.Format("Unhandled message category {0}", cat));
                 break;
@@ -203,6 +207,12 @@ public class Server
         RemotePlayer sender = players.GetPlayer(msg.SenderConnection.RemoteUniqueIdentifier);
         string chat = msg.ReadString();
         SendChatMessageToAll(sender, chat);
+    }
+    
+    private void HandleAttemptToJoinSlot(NetIncomingMessage msg)
+    {
+        int slot = msg.ReadInt32();
+        players.MovePlayerToSlot(players.GetPlayer(msg.SenderConnection.RemoteUniqueIdentifier), slot);
     }
 
     private void DropClient(NetConnection connection, string message, params object[] args)

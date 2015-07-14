@@ -9,6 +9,14 @@ public class Session : MonoBehaviour
 
     private Client client = null;
 
+    public RemotePlayerSet Players
+    {
+        get
+        {
+            return client.Players;
+        }
+    }
+
     public void Awake()
     {
         Instance = this;
@@ -100,5 +108,10 @@ public class Session : MonoBehaviour
 
             return client.LastStatusMessage;
         }
+    }
+
+    public void JoinSlot(int slot)
+    {
+        client.JoinSlot(slot);
     }
 }

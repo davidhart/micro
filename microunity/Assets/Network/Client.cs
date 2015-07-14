@@ -16,8 +16,7 @@ public class Client
     private string lastStatusMessage = string.Empty;
     
     private bool hasReceivedStatus = false;
-    private RemotePlayerSet players = null;
-
+    
     public void RegisterLogDelegate(LogDelegate logDelegate)
     {
         log += logDelegate;
@@ -38,6 +37,12 @@ public class Client
         chatHandler -= chatDelegate;
     }
 
+    public RemotePlayerSet Players
+    {
+        get;
+        private set;
+    }
+
     public Client()
     {
         config = new NetPeerConfiguration("cars");
@@ -55,7 +60,7 @@ public class Client
 
         connection = client.Connect(host, port, msg);
 
-        players = new RemotePlayerSet();
+        Players = new RemotePlayerSet();
     }
 
     public void Disconnect(string reason)
@@ -63,7 +68,7 @@ public class Client
         client.Shutdown(reason);
         connection = null;
 
-        players = null;
+        Players = null;
     }
 
     public bool IsConnecting
@@ -183,7 +188,7 @@ public class Client
     private void HandleSessionInit(NetIncomingMessage msg)
     {
         int slots = msg.ReadInt32();
-        players.SetNumSlots(slots);
+        Players.SetNumSlots(slots);
         
         int numconnected = msg.ReadInt32();
         for (int i = 0; i < numconnected; ++i)
@@ -193,10 +198,10 @@ public class Client
 
             RemotePlayer player = new RemotePlayer(uniqueID, name);
 
-            players.AddPlayer(player, false);
+            Players.AddPlayer(player, false);
 
             int slot = msg.ReadInt32();
-            players.MovePlayerToSlot(player, slot);
+            Players.MovePlayerToSlot(player, slot);
         }   
     }
 
@@ -205,14 +210,18 @@ public class Client
         long id = msg.ReadInt64();
         string name = msg.ReadString();
 
-        players.AddPlayer(new RemotePlayer(id, name), false);
+        Players.AddPlayer(new RemotePlayer(id, name), false);
+
+        chatHandler(string.Format("{0} joined...", name));
     }
 
     private void HandlePlayerLeft(NetIncomingMessage msg)
     {
         long id = msg.ReadInt64();
 
-        players.RemovePlayer(id);
+        chatHandler(string.Format("{0} disconnected...", Players.GetPlayer(id).PlayerName));
+
+        Players.RemovePlayer(id);
     }
 
     private void HandlePlayerSetSlot(NetIncomingMessage msg)
@@ -220,7 +229,7 @@ public class Client
         long id = msg.ReadInt64();
         int slot = msg.ReadInt32();
 
-        players.MovePlayerToSlot(players.GetPlayer(id), slot);
+        Players.MovePlayerToSlot(Players.GetPlayer(id), slot);
     }
 
     private void HandleChatMessage(NetIncomingMessage msg)
@@ -236,13 +245,22 @@ public class Client
         }
         else
         {
-            RemotePlayer sender = players.GetPlayer(playerID);
-            Color nameColor = PlayerIdentityGenerator.PlayerIDToColor(sender.PlayerSlot);
+            RemotePlayer sender = Players.GetPlayer(playerID);
+            Color nameColor = PlayerIdentityGenerator.PlayerSlotToColor(sender.PlayerSlot);
 
             chatString = string.Format("<color=#{0}>[{1}]</color> {2}", nameColor.ToHexStringRGBA(), sender.PlayerName, chat);
         }
 
         log(chatString);
         chatHandler(chatString);
+    }
+
+    public void JoinSlot(int slot)
+    {
+        NetOutgoingMessage msg = CreateMessage(ClientToServerMessageCategory.JoinSlot);
+
+        msg.Write(slot);
+
+        client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered);
     }
 }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
 
 class Menu_Lobby : MonoBehaviour
@@ -6,17 +7,78 @@ class Menu_Lobby : MonoBehaviour
     public ScrollRect ChatScrollRect = null;
     public Text ChatText = null;
     public InputField ChatInputField = null;
+
+    public GameObject PlayerSlotPrototype = null;
+
+    private List<LobbySlot> Slots = new List<LobbySlot>();
     
     public void Start()
     {
-        Session.Instance.RegisterChatDelegate(OnChatReceived);
-
         ChatInputField.onEndEdit.AddListener(OnChatSubmit);
+
+        Session.Instance.RegisterChatDelegate(OnChatReceived);
+        Session.Instance.Players.OnNumSlotsChanged += SetupPlayerSlots;
+        Session.Instance.Players.OnPlayerAdded += PlayerRefresh;
+        Session.Instance.Players.OnPlayerRemoved += PlayerRefresh;
+        Session.Instance.Players.OnPlayerSetSlot += PlayerRefresh;
+
+        PlayerSlotPrototype.SetActive(false);
+        SetupPlayerSlots(Session.Instance.Players.SlotsCount);
     }
 
     public void OnDestroy()
     {
         Session.Instance.DeregisterChatdelegate(OnChatReceived);
+
+        Session.Instance.Players.OnNumSlotsChanged -= SetupPlayerSlots;
+        Session.Instance.Players.OnPlayerAdded -= PlayerRefresh;
+        Session.Instance.Players.OnPlayerRemoved -= PlayerRefresh;
+        Session.Instance.Players.OnPlayerSetSlot -= PlayerRefresh;
+    }
+
+    public void PlayerRefresh(RemotePlayer player)
+    {
+        RefreshPlayers();
+    }
+
+    private void SetupPlayerSlots(int slots)
+    {
+        if (Slots.Count < slots)
+        {
+            for (int i = Slots.Count; i < slots; i++)
+            {
+                GameObject slotGO = GameObject.Instantiate(PlayerSlotPrototype) as GameObject;
+                Slots.Add(slotGO.GetComponent<LobbySlot>());
+                slotGO.transform.SetParent(PlayerSlotPrototype.transform.parent, false);
+                slotGO.SetActive(true);
+            }
+        }
+        else
+        {
+            for (int i = Slots.Count - 1; i >= slots; i--)
+            {
+                GameObject.Destroy(Slots[i].gameObject);
+                Slots.RemoveAt(i);
+            }
+        }
+
+        RefreshPlayers();
+    }
+
+    private void RefreshPlayers()
+    {
+        for (int i = 0; i < Session.Instance.Players.SlotsCount; ++i)
+        {
+            RemotePlayer player = Session.Instance.Players.GetPlayerInSlot(i);
+            if (player == null)
+            {
+                Slots[i].Setup(null, i);
+            }
+            else
+            {
+                Slots[i].Setup(player.PlayerName, i);
+            }
+        }
     }
 
     private void OnChatReceived(string chat)
