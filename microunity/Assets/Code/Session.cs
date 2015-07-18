@@ -17,6 +17,14 @@ public class Session : MonoBehaviour
         }
     }
 
+    public RemotePlayer LocalPlayer
+    {
+        get
+        {
+            return client.Players.GetPlayer(client.RemoteUniqueIdentifier);
+        }
+    }
+
     public void Awake()
     {
         Instance = this;
@@ -113,5 +121,10 @@ public class Session : MonoBehaviour
     public void JoinSlot(int slot)
     {
         client.JoinSlot(slot);
+    }
+
+    public void SetStatus(RemotePlayerStatus status)
+    {
+        client.SetStatus(status);
     }
 }

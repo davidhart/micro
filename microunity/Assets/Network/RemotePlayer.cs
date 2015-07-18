@@ -1,17 +1,26 @@
 ﻿using Lidgren.Network;
 using System.Collections.Generic;
 
+public enum RemotePlayerStatus
+{
+    LobbyNotReady = 0,
+    LobbyReady = 1,
+    MAX
+}
+
 public class RemotePlayer
 {
     public string PlayerName { get; set; }
     public int PlayerSlot { get; set; }
     public readonly long UniqueID;
+    public RemotePlayerStatus Status { get; set; }
 
     public RemotePlayer(long uniqueID, string name)
     {
         this.UniqueID = uniqueID;
         this.PlayerName = name;
         PlayerSlot = -1;
+        Status = RemotePlayerStatus.LobbyNotReady;
     }
 }
 
@@ -20,10 +29,11 @@ public class RemotePlayerSet
     public delegate void RemotePlayerDelegate(RemotePlayer player);
     public delegate void NumSlotsChangedDelegate(int slots);
 
-    public RemotePlayerDelegate OnPlayerSetSlot = (p) => {};
-    public RemotePlayerDelegate OnPlayerAdded = (p) => {};
-    public RemotePlayerDelegate OnPlayerRemoved = (p) => {};
+    public RemotePlayerDelegate OnPlayerSetSlot = (p) => { };
+    public RemotePlayerDelegate OnPlayerAdded = (p) => { };
+    public RemotePlayerDelegate OnPlayerRemoved = (p) => { };
     public NumSlotsChangedDelegate OnNumSlotsChanged = (p) => { };
+    public RemotePlayerDelegate OnPlayerStatusChanged = (p) => { };
 
     Dictionary<long, RemotePlayer> uniqueIDtoPlayer = new Dictionary<long, RemotePlayer>();
     List<RemotePlayer> slots = new List<RemotePlayer>();
@@ -152,5 +162,22 @@ public class RemotePlayerSet
         RemotePlayer player;
         uniqueIDtoPlayer.TryGetValue(uniqueID, out player);
         return player;
+    }
+
+    public void SetStatus(RemotePlayer player, RemotePlayerStatus status)
+    {
+        player.Status = status;
+
+        OnPlayerStatusChanged(player);
+    }
+
+    public void SetAllStatus(RemotePlayerStatus status)
+    {
+        foreach(RemotePlayer player in ConnectedPlayers)
+        {
+            player.Status = status;
+
+            OnPlayerStatusChanged(player);
+        }
     }
 }

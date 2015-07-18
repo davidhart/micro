@@ -7,6 +7,7 @@ public class Client
     NetClient client = null;
     NetConnection connection = null;
 
+
     public delegate void LogDelegate(string log);
     private LogDelegate log = (s) => { };
 
@@ -41,6 +42,17 @@ public class Client
     {
         get;
         private set;
+    }
+
+    public long RemoteUniqueIdentifier
+    {
+        get
+        {
+            if (connection == null)
+                return 0;
+
+            return client.UniqueIdentifier;
+        }
     }
 
     public Client()
@@ -174,6 +186,10 @@ public class Client
                 HandlePlayerLeft(msg);
                 break;
 
+            case ServerToClientMessageCategory.PlayerSetStatus:
+                HandlePlayerSetStatus(msg);
+                break;
+
             case ServerToClientMessageCategory.Chat:
                 HandleChatMessage(msg);
                 break;
@@ -195,13 +211,14 @@ public class Client
         {
             long uniqueID = msg.ReadInt64();
             string name = msg.ReadString();
+            int slot = msg.ReadInt32();
+            RemotePlayerStatus status = (RemotePlayerStatus)msg.ReadByte();
 
             RemotePlayer player = new RemotePlayer(uniqueID, name);
 
             Players.AddPlayer(player, false);
-
-            int slot = msg.ReadInt32();
             Players.MovePlayerToSlot(player, slot);
+            Players.SetStatus(player, status);
         }   
     }
 
@@ -209,8 +226,11 @@ public class Client
     {
         long id = msg.ReadInt64();
         string name = msg.ReadString();
+        RemotePlayerStatus status = (RemotePlayerStatus)msg.ReadByte();
 
+        RemotePlayer player = new RemotePlayer(id, name);
         Players.AddPlayer(new RemotePlayer(id, name), false);
+        Players.SetStatus(player, status);
 
         chatHandler(string.Format("{0} joined...", name));
     }
@@ -230,6 +250,14 @@ public class Client
         int slot = msg.ReadInt32();
 
         Players.MovePlayerToSlot(Players.GetPlayer(id), slot);
+    }
+
+    private void HandlePlayerSetStatus(NetIncomingMessage msg)
+    {
+        long id = msg.ReadInt64();
+        RemotePlayerStatus status = (RemotePlayerStatus)msg.ReadByte();
+
+        Players.SetStatus(Players.GetPlayer(id), status);
     }
 
     private void HandleChatMessage(NetIncomingMessage msg)
@@ -258,9 +286,14 @@ public class Client
     public void JoinSlot(int slot)
     {
         NetOutgoingMessage msg = CreateMessage(ClientToServerMessageCategory.JoinSlot);
-
         msg.Write(slot);
+        client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered);
+    }
 
+    public void SetStatus(RemotePlayerStatus status)
+    {
+        NetOutgoingMessage msg = CreateMessage(ClientToServerMessageCategory.SetStatus);
+        msg.Write((byte)status);
         client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered);
     }
 }

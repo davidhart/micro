@@ -36,6 +36,7 @@ public class Server
 
         players.OnPlayerSetSlot += OnPlayerSetSlot;
         players.OnPlayerAdded += OnPlayerAdded;
+        players.OnPlayerStatusChanged += OnPlayerStatusChanged;
 
         server = new NetServer(config);
     }
@@ -139,6 +140,7 @@ public class Server
             msg.Write(connectedPlayer.UniqueID);
             msg.Write(connectedPlayer.PlayerName);
             msg.Write(connectedPlayer.PlayerSlot);
+            msg.Write((byte)connectedPlayer.Status);
         }
         server.SendMessage(msg, connection, NetDeliveryMethod.ReliableOrdered, 0);
 
@@ -154,6 +156,7 @@ public class Server
         NetOutgoingMessage msg = CreateMessage(ServerToClientMessageCategory.PlayerJoined);
         msg.Write(player.UniqueID);
         msg.Write(player.PlayerName);
+        msg.Write((byte)player.Status);
         server.SendToAll(msg, null, NetDeliveryMethod.ReliableOrdered, 0);
     }
 
@@ -163,6 +166,16 @@ public class Server
         NetOutgoingMessage msg = CreateMessage(ServerToClientMessageCategory.PlayerSetSlot);
         msg.Write(player.UniqueID);
         msg.Write(player.PlayerSlot);
+        server.SendToAll(msg, null, NetDeliveryMethod.ReliableOrdered, 0);
+
+        players.SetAllStatus(RemotePlayerStatus.LobbyNotReady);
+    }
+    
+    private void OnPlayerStatusChanged(RemotePlayer player)
+    {
+        NetOutgoingMessage msg = CreateMessage(ServerToClientMessageCategory.PlayerSetStatus);
+        msg.Write(player.UniqueID);
+        msg.Write((byte)player.Status);
         server.SendToAll(msg, null, NetDeliveryMethod.ReliableOrdered, 0);
     }
 
@@ -196,6 +209,10 @@ public class Server
                 HandleAttemptToJoinSlot(msg);
                 break;
 
+            case ClientToServerMessageCategory.SetStatus:
+                HandleSetStatus(msg);
+                break;
+
             default:
                 log(string.Format("Unhandled message category {0}", cat));
                 break;
@@ -213,6 +230,15 @@ public class Server
     {
         int slot = msg.ReadInt32();
         players.MovePlayerToSlot(players.GetPlayer(msg.SenderConnection.RemoteUniqueIdentifier), slot);
+    }
+
+    private void HandleSetStatus(NetIncomingMessage msg)
+    {
+        RemotePlayerStatus status = (RemotePlayerStatus)msg.ReadByte();
+
+        RemotePlayer sender = players.GetPlayer(msg.SenderConnection.RemoteUniqueIdentifier);
+
+        players.SetStatus(sender, status);
     }
 
     private void DropClient(NetConnection connection, string message, params object[] args)

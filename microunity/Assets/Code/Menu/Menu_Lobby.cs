@@ -21,6 +21,7 @@ class Menu_Lobby : MonoBehaviour
         Session.Instance.Players.OnPlayerAdded += PlayerRefresh;
         Session.Instance.Players.OnPlayerRemoved += PlayerRefresh;
         Session.Instance.Players.OnPlayerSetSlot += PlayerRefresh;
+        Session.Instance.Players.OnPlayerStatusChanged += PlayerRefresh;
 
         PlayerSlotPrototype.SetActive(false);
         SetupPlayerSlots(Session.Instance.Players.SlotsCount);
@@ -72,11 +73,11 @@ class Menu_Lobby : MonoBehaviour
             RemotePlayer player = Session.Instance.Players.GetPlayerInSlot(i);
             if (player == null)
             {
-                Slots[i].Setup(null, i);
+                Slots[i].SetupEmpty(i);
             }
             else
             {
-                Slots[i].Setup(player.PlayerName, i);
+                Slots[i].Setup(i, player.PlayerName, player.Status == RemotePlayerStatus.LobbyReady);
             }
         }
     }
