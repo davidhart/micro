@@ -16,7 +16,7 @@ class Menu_Connect : MonoBehaviour
 
     public void OnCreatePressed()
     {
-        ServerSession.Instance.Start(ServerSession.DefaultPort);
+        ServerSession.Instance.StartServer(ServerSession.DefaultPort);
         Session.Instance.Connect("localhost");
 
         Application.LoadLevel("Menu_Connecting");

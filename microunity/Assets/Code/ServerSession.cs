@@ -13,7 +13,7 @@ class ServerSession : MonoBehaviour
         Instance = this;
     }
 
-    public void Start(int port)
+    public void StartServer(int port)
     {
         Stop();
         server = new Server(port);
