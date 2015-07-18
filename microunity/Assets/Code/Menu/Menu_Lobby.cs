@@ -35,6 +35,7 @@ class Menu_Lobby : MonoBehaviour
         Session.Instance.Players.OnPlayerAdded -= PlayerRefresh;
         Session.Instance.Players.OnPlayerRemoved -= PlayerRefresh;
         Session.Instance.Players.OnPlayerSetSlot -= PlayerRefresh;
+        Session.Instance.Players.OnPlayerStatusChanged -= PlayerRefresh;
     }
 
     public void PlayerRefresh(RemotePlayer player)
