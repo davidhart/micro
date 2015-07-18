@@ -158,6 +158,8 @@ public class Server
         msg.Write(player.PlayerName);
         msg.Write((byte)player.Status);
         server.SendToAll(msg, null, NetDeliveryMethod.ReliableOrdered, 0);
+
+        LobbySettingsChanged();
     }
 
     private void OnPlayerSetSlot(RemotePlayer player)
@@ -168,7 +170,7 @@ public class Server
         msg.Write(player.PlayerSlot);
         server.SendToAll(msg, null, NetDeliveryMethod.ReliableOrdered, 0);
 
-        players.SetAllStatus(RemotePlayerStatus.LobbyNotReady);
+        LobbySettingsChanged();
     }
     
     private void OnPlayerStatusChanged(RemotePlayer player)
@@ -187,6 +189,8 @@ public class Server
         NetOutgoingMessage msg = CreateMessage(ServerToClientMessageCategory.PlayerLeft);
         msg.Write(connection.RemoteUniqueIdentifier);
         server.SendToAll(msg, connection, NetDeliveryMethod.ReliableOrdered, 0);
+
+        LobbySettingsChanged();
     }
 
     private void HandeIncomingDataMessage(NetIncomingMessage msg)
@@ -247,5 +251,10 @@ public class Server
 
         log(message);
         connection.Disconnect(message);
+    }
+
+    private void LobbySettingsChanged()
+    {
+        players.SetAllStatus(RemotePlayerStatus.LobbyNotReady);
     }
 }

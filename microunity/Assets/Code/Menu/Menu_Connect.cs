@@ -4,10 +4,16 @@ using UnityEngine.UI;
 class Menu_Connect : MonoBehaviour
 {
     public InputField AddressField = null;
+
+    public void Awake()
+    {
+        Session.Instance.Disconnect();
+        ServerSession.Instance.StopServer();
+    }
     
     public void OnConnectPressed()
     {
-        ServerSession.Instance.Stop();
+        ServerSession.Instance.StopServer();
         Session.Instance.Connect(AddressField.text);
 
         Application.LoadLevel("Menu_Connecting");

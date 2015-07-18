@@ -15,13 +15,13 @@ class ServerSession : MonoBehaviour
 
     public void StartServer(int port)
     {
-        Stop();
+        StopServer();
         server = new Server(port);
         server.RegisterLogDelegate(logServer);
         server.Start();
     }
 
-    public void Stop()
+    public void StopServer()
     {
         if (server != null)
         {
