@@ -18,14 +18,16 @@ public struct VehicleState
 
     public void Update(float dt, VehicleInputState input)
     {
+        float acceleration = Parameters.MaxAcceleration * (1.0f - Mathf.Clamp01(Mathf.Abs(LocalVelocity.y) / Parameters.MaxSpeed));
+
         if (input.Forward > 0)
         {
-            LocalVelocity += Vector3.forward * Parameters.Acceleration * dt;
+            LocalVelocity += Vector3.forward * acceleration * dt;
         }
 
         if (input.Back > 0)
         {
-            LocalVelocity -= Vector3.forward * Parameters.Acceleration * dt;
+            LocalVelocity -= Vector3.forward * acceleration * dt;
         }
 
         if (input.Turn != 0.0f)

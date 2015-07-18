@@ -213,10 +213,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Target: {fileID: 1363607628}
   Parameters:
-    Acceleration: 50
-    Drag: {x: .5, y: .5, z: .0599999987}
-    TurnSpeed: 500
+    Drag: {x: .5, y: .5, z: .0199999996}
+    TurnSpeed: 360
     MaxTurnForwardVel: 20
+    MaxAcceleration: 30
+    MaxSpeed: 30
 --- !u!4 &1001489305
 Transform:
   m_ObjectHideFlags: 0
