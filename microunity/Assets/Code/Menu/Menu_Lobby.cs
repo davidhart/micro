@@ -31,11 +31,14 @@ class Menu_Lobby : MonoBehaviour
     {
         Session.Instance.DeregisterChatdelegate(OnChatReceived);
 
-        Session.Instance.Players.OnNumSlotsChanged -= SetupPlayerSlots;
-        Session.Instance.Players.OnPlayerAdded -= PlayerRefresh;
-        Session.Instance.Players.OnPlayerRemoved -= PlayerRefresh;
-        Session.Instance.Players.OnPlayerSetSlot -= PlayerRefresh;
-        Session.Instance.Players.OnPlayerStatusChanged -= PlayerRefresh;
+        if (Session.Instance.Players != null)
+        {
+            Session.Instance.Players.OnNumSlotsChanged -= SetupPlayerSlots;
+            Session.Instance.Players.OnPlayerAdded -= PlayerRefresh;
+            Session.Instance.Players.OnPlayerRemoved -= PlayerRefresh;
+            Session.Instance.Players.OnPlayerSetSlot -= PlayerRefresh;
+            Session.Instance.Players.OnPlayerStatusChanged -= PlayerRefresh;
+        }
     }
 
     public void PlayerRefresh(RemotePlayer player)
