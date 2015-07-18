@@ -144,7 +144,7 @@ public class Client
         }
     }
 
-    private NetOutgoingMessage CreateMessage(ClientToServerMessageCategory category)
+    private NetOutgoingMessage CreateMessage(eClientToServerMessage category)
     {
         NetOutgoingMessage message = client.CreateMessage();
         message.Write((byte)category);
@@ -153,16 +153,16 @@ public class Client
 
     public void SendChat(string chat)
     {
-        NetOutgoingMessage msg = CreateMessage(ClientToServerMessageCategory.Chat);
+        NetOutgoingMessage msg = CreateMessage(eClientToServerMessage.Chat);
         msg.Write(chat);
         client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered);
     }
 
     private void HandeIncomingDataMessage(NetIncomingMessage msg)
     {
-        ServerToClientMessageCategory cat = (ServerToClientMessageCategory)msg.ReadByte();
+        eServerToClientMessage cat = (eServerToClientMessage)msg.ReadByte();
         
-        if (cat >= ServerToClientMessageCategory.MAX)
+        if (cat >= eServerToClientMessage.MAX)
         {
             client.Disconnect("server error");
             return;
@@ -170,27 +170,27 @@ public class Client
 
         switch(cat)
         {
-            case ServerToClientMessageCategory.SessionInit:
+            case eServerToClientMessage.SessionInit:
                 HandleSessionInit(msg);
                 break;
 
-            case ServerToClientMessageCategory.PlayerJoined:
+            case eServerToClientMessage.PlayerJoined:
                 HandlePlayerJoined(msg);
                 break;
 
-            case ServerToClientMessageCategory.PlayerSetSlot:
+            case eServerToClientMessage.PlayerSetSlot:
                 HandlePlayerSetSlot(msg);
                 break;
 
-            case ServerToClientMessageCategory.PlayerLeft:
+            case eServerToClientMessage.PlayerLeft:
                 HandlePlayerLeft(msg);
                 break;
 
-            case ServerToClientMessageCategory.PlayerSetStatus:
+            case eServerToClientMessage.PlayerSetStatus:
                 HandlePlayerSetStatus(msg);
                 break;
 
-            case ServerToClientMessageCategory.Chat:
+            case eServerToClientMessage.Chat:
                 HandleChatMessage(msg);
                 break;
 
@@ -285,15 +285,21 @@ public class Client
 
     public void JoinSlot(int slot)
     {
-        NetOutgoingMessage msg = CreateMessage(ClientToServerMessageCategory.JoinSlot);
+        NetOutgoingMessage msg = CreateMessage(eClientToServerMessage.JoinSlot);
         msg.Write(slot);
         client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered);
     }
 
     public void SetStatus(RemotePlayerStatus status)
     {
-        NetOutgoingMessage msg = CreateMessage(ClientToServerMessageCategory.SetStatus);
+        NetOutgoingMessage msg = CreateMessage(eClientToServerMessage.SetStatus);
         msg.Write((byte)status);
+        client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered);
+    }
+
+    public void LaunchGame()
+    {
+        NetOutgoingMessage msg = CreateMessage(eClientToServerMessage.StartGame);
         client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered);
     }
 }

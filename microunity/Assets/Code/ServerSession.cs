@@ -33,7 +33,7 @@ class ServerSession : MonoBehaviour
     {
         if (server != null)
         {
-            server.Update();
+            server.Update(Time.deltaTime);
         }
     }
 

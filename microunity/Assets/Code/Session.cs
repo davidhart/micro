@@ -127,4 +127,12 @@ public class Session : MonoBehaviour
     {
         client.SetStatus(status);
     }
+
+    public void StartGame()
+    {
+        if (Players.AllPlayerStatusEquals(RemotePlayerStatus.LobbyReady))
+        {
+            client.LaunchGame();
+        }
+    }
 }

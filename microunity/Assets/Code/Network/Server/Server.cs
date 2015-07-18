@@ -1,28 +1,30 @@
 ﻿using Lidgren.Network;
 using UnityEngine;
 using System.Collections.Generic;
+using Gamemodes;
 
 public class Server
 {
     NetPeerConfiguration config;
     NetServer server;
+    ServerGameMode currentGameMode;
 
     public delegate void LogDelegate(string log);
-    private LogDelegate log = (s) => { };
+    private LogDelegate logCallback = (s) => { };
 
     private const int MaxNumConnectedClients = 10;
     private const int MaxSlots = 4;
 
-    private RemotePlayerSet players = new RemotePlayerSet();
+    public RemotePlayerSet Players { get; private set; }
 
-    public void RegisterLogDelegate(LogDelegate logDelegate)
+    public void RegisterLogDelegate(LogDelegate logCallback)
     {
-        log += logDelegate;
+        this.logCallback += logCallback;
     }
 
-    public void DeregisterLogdelegate(LogDelegate logDelegate)
+    public void DeregisterLogdelegate(LogDelegate logCallback)
     {
-        log -= logDelegate;
+        this.logCallback -= logCallback;
     }
 
     public Server(int port)
@@ -32,11 +34,11 @@ public class Server
         config.MaximumConnections = MaxNumConnectedClients;
         config.ConnectionTimeout = 15.0f;
 
-        players.SetNumSlots(MaxSlots);
-
-        players.OnPlayerSetSlot += OnPlayerSetSlot;
-        players.OnPlayerAdded += OnPlayerAdded;
-        players.OnPlayerStatusChanged += OnPlayerStatusChanged;
+        Players = new RemotePlayerSet();
+        Players.SetNumSlots(MaxSlots);
+        Players.OnPlayerSetSlot += OnPlayerSetSlot;
+        Players.OnPlayerAdded += OnPlayerAdded;
+        Players.OnPlayerStatusChanged += OnPlayerStatusChanged;
 
         server = new NetServer(config);
     }
@@ -51,7 +53,17 @@ public class Server
         server.Shutdown(reason);
     }
 
-    public void Update()
+    public void Update(float dt)
+    {
+        HandleIncomingData();
+
+        if (currentGameMode != null)
+        {
+            currentGameMode.Update(dt);
+        }
+    }
+
+    private void HandleIncomingData()
     {
         NetIncomingMessage im;
         while ((im = server.ReadMessage()) != null)
@@ -64,14 +76,14 @@ public class Server
                 case NetIncomingMessageType.WarningMessage:
                 case NetIncomingMessageType.VerboseDebugMessage:
                     string text = im.ReadString();
-                    log(text);
+                    Log(text);
                     break;
                 case NetIncomingMessageType.StatusChanged:
                     NetConnectionStatus status = (NetConnectionStatus)im.ReadByte();
 
                     string reason = im.ReadString();
 
-                    log(status.ToString() + ": " + reason);
+                    Log(status.ToString() + ": " + reason);
 
                     if (status == NetConnectionStatus.Connected)
                     {
@@ -87,14 +99,14 @@ public class Server
                     HandeIncomingDataMessage(im);
                     break;
                 default:
-                    log("Unhandled type: " + im.MessageType + " " + im.LengthBytes + " bytes");
+                    Log("Unhandled type: " + im.MessageType + " " + im.LengthBytes + " bytes");
                     break;
             }
             server.Recycle(im);
         }
     }
 
-    private NetOutgoingMessage CreateMessage(ServerToClientMessageCategory category)
+    public NetOutgoingMessage CreateMessage(eServerToClientMessage category)
     {
         NetOutgoingMessage msg = server.CreateMessage();
         msg.Write((byte)category);
@@ -109,7 +121,7 @@ public class Server
         if (server.ConnectionsCount == 0)
             return;
 
-        NetOutgoingMessage msg = CreateMessage(ServerToClientMessageCategory.Chat);
+        NetOutgoingMessage msg = CreateMessage(eServerToClientMessage.Chat);
         if (sender == null)
             msg.Write((long)0);
         else
@@ -123,19 +135,26 @@ public class Server
     {
         string name = connection.RemoteHailMessage.ReadString();
 
-        if (players.ConnectedCount >= MaxNumConnectedClients)
+        if (Players.ConnectedCount >= MaxNumConnectedClients)
         {
             connection.Disconnect("Server is full");
-            log(string.Format("player connection attempt by {0}{1} rejected, server full", name, NetUtility.ToHexString(connection.RemoteUniqueIdentifier)));
+            Log(string.Format("player connection attempt by {0}{1} rejected, server full", name, NetUtility.ToHexString(connection.RemoteUniqueIdentifier)));
+            return;
+        }
+
+        if(currentGameMode != null && currentGameMode.AllowJoinInProgress == false)
+        {
+            connection.Disconnect("Cannot connect to game already in progress");
+            Log(string.Format("player connection attempt by {0}{1} rejected, gamemode in progress", name, NetUtility.ToHexString(connection.RemoteUniqueIdentifier)));
             return;
         }
         
         RemotePlayer player = new RemotePlayer(connection.RemoteUniqueIdentifier, name);
 
-        NetOutgoingMessage msg = CreateMessage(ServerToClientMessageCategory.SessionInit);
-        msg.Write(players.SlotsCount);
-        msg.Write(players.ConnectedCount);
-        foreach(RemotePlayer connectedPlayer in players.ConnectedPlayers)
+        NetOutgoingMessage msg = CreateMessage(eServerToClientMessage.SessionInit);
+        msg.Write(Players.SlotsCount);
+        msg.Write(Players.ConnectedCount);
+        foreach (RemotePlayer connectedPlayer in Players.ConnectedPlayers)
         {
             msg.Write(connectedPlayer.UniqueID);
             msg.Write(connectedPlayer.PlayerName);
@@ -145,15 +164,15 @@ public class Server
         server.SendMessage(msg, connection, NetDeliveryMethod.ReliableOrdered, 0);
 
         // Add player and try to default assign a slot
-        players.AddPlayer(player, true);
+        Players.AddPlayer(player, true);
 
-        log(string.Format("player ({0} {1}) joined, slot {2}", name, NetUtility.ToHexString(connection.RemoteUniqueIdentifier), player.PlayerSlot));
+        Log(string.Format("player ({0} {1}) joined, slot {2}", name, NetUtility.ToHexString(connection.RemoteUniqueIdentifier), player.PlayerSlot));
     }
     
     private void OnPlayerAdded(RemotePlayer player)
     {
         // Nofity everyone the player was added
-        NetOutgoingMessage msg = CreateMessage(ServerToClientMessageCategory.PlayerJoined);
+        NetOutgoingMessage msg = CreateMessage(eServerToClientMessage.PlayerJoined);
         msg.Write(player.UniqueID);
         msg.Write(player.PlayerName);
         msg.Write((byte)player.Status);
@@ -165,7 +184,7 @@ public class Server
     private void OnPlayerSetSlot(RemotePlayer player)
     {
         // Notify all players on slot assignement change
-        NetOutgoingMessage msg = CreateMessage(ServerToClientMessageCategory.PlayerSetSlot);
+        NetOutgoingMessage msg = CreateMessage(eServerToClientMessage.PlayerSetSlot);
         msg.Write(player.UniqueID);
         msg.Write(player.PlayerSlot);
         server.SendToAll(msg, null, NetDeliveryMethod.ReliableOrdered, 0);
@@ -175,7 +194,7 @@ public class Server
     
     private void OnPlayerStatusChanged(RemotePlayer player)
     {
-        NetOutgoingMessage msg = CreateMessage(ServerToClientMessageCategory.PlayerSetStatus);
+        NetOutgoingMessage msg = CreateMessage(eServerToClientMessage.PlayerSetStatus);
         msg.Write(player.UniqueID);
         msg.Write((byte)player.Status);
         server.SendToAll(msg, null, NetDeliveryMethod.ReliableOrdered, 0);
@@ -183,10 +202,10 @@ public class Server
 
     private void HandlePlayerDisconnected(NetConnection connection)
     {
-        players.RemovePlayer(connection.RemoteUniqueIdentifier);
+        Players.RemovePlayer(connection.RemoteUniqueIdentifier);
 
         // Notify everyone else the player left
-        NetOutgoingMessage msg = CreateMessage(ServerToClientMessageCategory.PlayerLeft);
+        NetOutgoingMessage msg = CreateMessage(eServerToClientMessage.PlayerLeft);
         msg.Write(connection.RemoteUniqueIdentifier);
         server.SendToAll(msg, connection, NetDeliveryMethod.ReliableOrdered, 0);
 
@@ -195,9 +214,9 @@ public class Server
 
     private void HandeIncomingDataMessage(NetIncomingMessage msg)
     {
-        ClientToServerMessageCategory cat = (ClientToServerMessageCategory)msg.ReadByte();
+        eClientToServerMessage cat = (eClientToServerMessage)msg.ReadByte();
 
-        if (cat >= ClientToServerMessageCategory.MAX)
+        if (cat >= eClientToServerMessage.MAX)
         {
             DropClient(msg.SenderConnection, "Server error, unknown message category received: {0:n}", cat);
             return;
@@ -205,56 +224,98 @@ public class Server
 
         switch(cat)
         {
-            case ClientToServerMessageCategory.Chat:
+            case eClientToServerMessage.Chat:
                 HandleChatMessage(msg);
                 break;
 
-            case ClientToServerMessageCategory.JoinSlot:
+            case eClientToServerMessage.JoinSlot:
                 HandleAttemptToJoinSlot(msg);
                 break;
 
-            case ClientToServerMessageCategory.SetStatus:
+            case eClientToServerMessage.SetStatus:
                 HandleSetStatus(msg);
                 break;
 
+            case eClientToServerMessage.StartGame:
+                HandleLaunchGame(msg);
+                break;
+
             default:
-                log(string.Format("Unhandled message category {0}", cat));
+                Log(string.Format("Unhandled message category {0}", cat));
                 break;
         }
     }
 
     private void HandleChatMessage(NetIncomingMessage msg)
     {
-        RemotePlayer sender = players.GetPlayer(msg.SenderConnection.RemoteUniqueIdentifier);
+        RemotePlayer sender = Players.GetPlayer(msg.SenderConnection.RemoteUniqueIdentifier);
         string chat = msg.ReadString();
         SendChatMessageToAll(sender, chat);
     }
     
     private void HandleAttemptToJoinSlot(NetIncomingMessage msg)
     {
+        if (currentGameMode != null && currentGameMode.AllowJoinInProgress == false)
+            return;
+
         int slot = msg.ReadInt32();
-        players.MovePlayerToSlot(players.GetPlayer(msg.SenderConnection.RemoteUniqueIdentifier), slot);
+        Players.MovePlayerToSlot(Players.GetPlayer(msg.SenderConnection.RemoteUniqueIdentifier), slot);
     }
 
     private void HandleSetStatus(NetIncomingMessage msg)
     {
+        if (currentGameMode != null && currentGameMode.AllowJoinInProgress == false)
+            return;
+
         RemotePlayerStatus status = (RemotePlayerStatus)msg.ReadByte();
 
-        RemotePlayer sender = players.GetPlayer(msg.SenderConnection.RemoteUniqueIdentifier);
+        RemotePlayer sender = Players.GetPlayer(msg.SenderConnection.RemoteUniqueIdentifier);
 
-        players.SetStatus(sender, status);
+        Players.SetStatus(sender, status);
     }
 
-    private void DropClient(NetConnection connection, string message, params object[] args)
+    private void HandleLaunchGame(NetIncomingMessage msg)
+    {
+        if (currentGameMode != null)
+            return;
+
+        if (Players.AllPlayerStatusEquals(RemotePlayerStatus.LobbyReady))
+        {
+            LaunchGameMode("cars");
+        }
+    }
+
+    public void DropClient(NetConnection connection, string message, params object[] args)
     {
         message = string.Format(message, args);
 
-        log(message);
+        Log(message);
         connection.Disconnect(message);
     }
 
     private void LobbySettingsChanged()
     {
-        players.SetAllStatus(RemotePlayerStatus.LobbyNotReady);
+        Players.SetAllStatus(RemotePlayerStatus.LobbyNotReady);
+    }
+
+    private void LaunchGameMode(string name)
+    {
+        NetOutgoingMessage message = CreateMessage(eServerToClientMessage.GameModeLaunched);
+        message.Write(name);
+        server.SendToAll(message, null, NetDeliveryMethod.ReliableOrdered, 0);
+
+        currentGameMode = new Gamemodes.Cars.ServerGamemode(this);
+    }
+
+    public void Log(string message, params object[] args)
+    {
+        string logMessage = string.Format(message, args);
+
+        logCallback(logMessage);
+    }
+
+    public void SendToAll(NetOutgoingMessage message, NetConnection except, NetDeliveryMethod method, int sequenceChannel)
+    {
+        server.SendToAll(message, except, method, sequenceChannel);
     }
 }

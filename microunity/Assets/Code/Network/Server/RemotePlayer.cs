@@ -180,4 +180,15 @@ public class RemotePlayerSet
             OnPlayerStatusChanged(player);
         }
     }
+
+    public bool AllPlayerStatusEquals(RemotePlayerStatus status)
+    {
+        foreach(RemotePlayer player in ConnectedPlayers)
+        {
+            if (player.Status != status)
+                return false;
+        }
+
+        return true;
+    }
 }

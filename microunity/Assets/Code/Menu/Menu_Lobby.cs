@@ -8,6 +8,8 @@ class Menu_Lobby : MonoBehaviour
     public Text ChatText = null;
     public InputField ChatInputField = null;
 
+    public Button StartButton = null;
+
     public GameObject PlayerSlotPrototype = null;
 
     private List<LobbySlot> Slots = new List<LobbySlot>();
@@ -84,6 +86,8 @@ class Menu_Lobby : MonoBehaviour
                 Slots[i].Setup(i, player.PlayerName, player.Status == RemotePlayerStatus.LobbyReady);
             }
         }
+
+        StartButton.interactable = Session.Instance.Players.AllPlayerStatusEquals(RemotePlayerStatus.LobbyReady);
     }
 
     private void OnChatReceived(string chat)
@@ -125,5 +129,10 @@ class Menu_Lobby : MonoBehaviour
         Application.LoadLevel("Menu_Connect");
 
         this.enabled = false;
+    }
+
+    public void OnStartButtonPressed()
+    {
+        Session.Instance.StartGame();
     }
 }
