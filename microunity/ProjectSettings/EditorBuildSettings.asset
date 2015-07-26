@@ -13,3 +13,5 @@ EditorBuildSettings:
     path: Assets/Scenes/Menu/Menu_Lobby.unity
   - enabled: 1
     path: Assets/Scenes/Menu/Menu_Connecting.unity
+  - enabled: 1
+    path: Assets/Scenes/Modes/Mode_Cars.unity

@@ -135,4 +135,19 @@ public class Session : MonoBehaviour
             client.LaunchGame();
         }
     }
+
+    public void RegisterGameModeDelegate(Client.GameModeLaunchedDelegate launchDelegate)
+    {
+        client.RegisterGameModeLaunchDelegate(launchDelegate);
+    }
+
+    public void DeregisterGameModeLaunchedDelegate(Client.GameModeLaunchedDelegate launchDelegate)
+    {
+        client.DeregisterGameModeLaunchDelegate(launchDelegate);
+    }
+
+    public void AttachClientGameMode(Gamemodes.ClientGameMode gameMode)
+    {
+        client.AttachGameMode(gameMode);
+    }
 }

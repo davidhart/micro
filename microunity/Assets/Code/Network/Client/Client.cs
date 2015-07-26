@@ -17,7 +17,9 @@ public class Client
     private string lastStatusMessage = string.Empty;
     
     private bool hasReceivedStatus = false;
-    
+
+    private Gamemodes.ClientGameMode currentGameMode;
+
     public void RegisterLogDelegate(LogDelegate logDelegate)
     {
         log += logDelegate;
@@ -36,6 +38,19 @@ public class Client
     public void DeregisterChatDelegate(ChatDelegate chatDelegate)
     {
         chatHandler -= chatDelegate;
+    }
+
+    public delegate void GameModeLaunchedDelegate(string mode);
+    private GameModeLaunchedDelegate gameModeLaunchedHandler = (s) => { };
+
+    public void RegisterGameModeLaunchDelegate(GameModeLaunchedDelegate gameModeLaunchedDelegate)
+    {
+        gameModeLaunchedHandler += gameModeLaunchedDelegate;
+    }
+
+    public void DeregisterGameModeLaunchDelegate(GameModeLaunchedDelegate gameModeLaunchedDelegate)
+    {
+        gameModeLaunchedHandler += gameModeLaunchedDelegate;
     }
 
     public RemotePlayerSet Players
@@ -144,7 +159,7 @@ public class Client
         }
     }
 
-    private NetOutgoingMessage CreateMessage(eClientToServerMessage category)
+    public NetOutgoingMessage CreateMessage(eClientToServerMessage category)
     {
         NetOutgoingMessage message = client.CreateMessage();
         message.Write((byte)category);
@@ -192,6 +207,14 @@ public class Client
 
             case eServerToClientMessage.Chat:
                 HandleChatMessage(msg);
+                break;
+
+            case eServerToClientMessage.GameModeLaunched:
+                HandleGameModeLaunched(msg);
+                break;
+
+            case eServerToClientMessage.GameModeData:
+                HandleGameModeData(msg);
                 break;
 
             default:
@@ -283,6 +306,19 @@ public class Client
         chatHandler(chatString);
     }
 
+    private void HandleGameModeLaunched(NetIncomingMessage msg)
+    {
+        string gameModeName = msg.ReadString();
+
+        gameModeLaunchedHandler(gameModeName);
+    }
+
+    private void HandleGameModeData(NetIncomingMessage msg)
+    {
+        if (currentGameMode != null)
+            currentGameMode.HandleIncomingMessage(msg);
+    }
+
     public void JoinSlot(int slot)
     {
         NetOutgoingMessage msg = CreateMessage(eClientToServerMessage.JoinSlot);
@@ -301,5 +337,11 @@ public class Client
     {
         NetOutgoingMessage msg = CreateMessage(eClientToServerMessage.StartGame);
         client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered);
+    }
+
+    public void AttachGameMode(Gamemodes.ClientGameMode gameMode)
+    {
+        currentGameMode = gameMode;
+        gameMode.OnAttachedToClient(this);
     }
 }

@@ -24,6 +24,7 @@ class Menu_Lobby : MonoBehaviour
         Session.Instance.Players.OnPlayerRemoved += PlayerRefresh;
         Session.Instance.Players.OnPlayerSetSlot += PlayerRefresh;
         Session.Instance.Players.OnPlayerStatusChanged += PlayerRefresh;
+        Session.Instance.RegisterGameModeDelegate(OnGameModeLaunched);
 
         PlayerSlotPrototype.SetActive(false);
         SetupPlayerSlots(Session.Instance.Players.SlotsCount);
@@ -40,6 +41,7 @@ class Menu_Lobby : MonoBehaviour
             Session.Instance.Players.OnPlayerRemoved -= PlayerRefresh;
             Session.Instance.Players.OnPlayerSetSlot -= PlayerRefresh;
             Session.Instance.Players.OnPlayerStatusChanged -= PlayerRefresh;
+            Session.Instance.DeregisterGameModeLaunchedDelegate(OnGameModeLaunched);
         }
     }
 
@@ -134,5 +136,14 @@ class Menu_Lobby : MonoBehaviour
     public void OnStartButtonPressed()
     {
         Session.Instance.StartGame();
+    }
+
+    private void OnGameModeLaunched(string mode)
+    {
+        // TODO: pass off the launch data to a load state
+        if (mode == "cars")
+        {
+            Application.LoadLevel("Mode_Cars");
+        }
     }
 }
