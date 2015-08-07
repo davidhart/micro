@@ -87,6 +87,53 @@ NavMeshSettings:
     cellSize: .166666672
     manualCellSize: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &174157933
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 174157934}
+  - 114: {fileID: 174157935}
+  m_Layer: 0
+  m_Name: SessionVehicles
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &174157934
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 174157933}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 1363607629}
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
+--- !u!114 &174157935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 174157933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad805a19c9f0b47fd841b66b61796512, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  VehicleParameters:
+    Drag: {x: .5, y: .5, z: .0199999996}
+    TurnSpeed: 360
+    MaxTurnForwardVel: 20
+    MaxAcceleration: 30
+    MaxSpeed: 30
+  VehiclePrototype: {fileID: 1363607628}
 --- !u!1 &609030888
 GameObject:
   m_ObjectHideFlags: 0
@@ -184,52 +231,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1890997e8a23a90478951b4666028243, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &1001489303
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 1001489305}
-  - 114: {fileID: 1001489304}
-  m_Layer: 0
-  m_Name: PlayerVehicleController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1001489304
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1001489303}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52b0824bbc4a16b4cb3f8adfe97c6e2e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Target: {fileID: 1363607628}
-  Parameters:
-    Drag: {x: .5, y: .5, z: .0199999996}
-    TurnSpeed: 360
-    MaxTurnForwardVel: 20
-    MaxAcceleration: 30
-    MaxSpeed: 30
---- !u!4 &1001489305
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1001489303}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.82218397, y: -.577644348, z: 2.56112003}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 4
 --- !u!1001 &1048092510
 Prefab:
   m_ObjectHideFlags: 0
@@ -296,7 +297,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1363607627}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 119c975c172457540869c2bb37b6b3f9, type: 3}
+  m_Script: {fileID: 11500000, guid: 7047a71ac18d5499aafcf2fc8a716e30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   prefabPath: Prefabs/Car
@@ -307,11 +308,11 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1363607627}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.82218397, y: -.577644348, z: 2.56112003}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_Father: {fileID: 174157934}
+  m_RootOrder: 0
 --- !u!1 &1611699093
 GameObject:
   m_ObjectHideFlags: 0

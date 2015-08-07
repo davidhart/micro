@@ -1,24 +1,18 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PlayerVehicleController : MonoBehaviour
+public class LocalVehicleController : BaseVehicleController
 {
-    public Vehicle Target;
-    public VehicleParameters Parameters;
-
     private VehicleState state;
 
-    public void Start()
+    public LocalVehicleController()
     {
         state = new VehicleState();
         state.Position = Vector3.zero;
         state.Rotation = Quaternion.identity;
-        state.Parameters = Parameters;
-
-        Target.Spawn(state);
     }
 
-    void Update()
+    public override void Update()
     {
         VehicleInputState input = new VehicleInputState();
 
@@ -36,7 +30,7 @@ public class PlayerVehicleController : MonoBehaviour
         if (Input.GetKey(KeyCode.A))
             input.Turn -= 1.0f;
 
-        state.Update(Time.deltaTime, input);
+        state.Update(Time.deltaTime, input, Parameters);
 
         Target.SetState(state);
     }

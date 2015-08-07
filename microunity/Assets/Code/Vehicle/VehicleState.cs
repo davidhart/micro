@@ -10,15 +10,13 @@ public struct VehicleInputState
 
 public struct VehicleState
 {
-    public VehicleParameters Parameters;
-
     public Vector3 Position;
     public Quaternion Rotation;
     public Vector3 LocalVelocity;
 
-    public void Update(float dt, VehicleInputState input)
+    public void Update(float dt, VehicleInputState input, VehicleParameters parameters)
     {
-        float acceleration = Parameters.MaxAcceleration * (1.0f - Mathf.Clamp01(Mathf.Abs(LocalVelocity.y) / Parameters.MaxSpeed));
+        float acceleration = parameters.MaxAcceleration * (1.0f - Mathf.Clamp01(Mathf.Abs(LocalVelocity.y) / parameters.MaxSpeed));
 
         if (input.Forward > 0)
         {
@@ -32,14 +30,14 @@ public struct VehicleState
 
         if (input.Turn != 0.0f)
         {
-            float turnForwardFactor = Mathf.Clamp((LocalVelocity.z) / Parameters.MaxTurnForwardVel, -1.0f, 1.0f);
+            float turnForwardFactor = Mathf.Clamp((LocalVelocity.z) / parameters.MaxTurnForwardVel, -1.0f, 1.0f);
 
-            Rotation = Rotation * Quaternion.Euler(0.0f, Parameters.TurnSpeed * input.Turn * dt * turnForwardFactor, 0.0f);
+            Rotation = Rotation * Quaternion.Euler(0.0f, parameters.TurnSpeed * input.Turn * dt * turnForwardFactor, 0.0f);
         }
 
-        LocalVelocity -= new Vector3(LocalVelocity.x * Parameters.Drag.x,
-            LocalVelocity.y * Parameters.Drag.y,
-            LocalVelocity.z * Parameters.Drag.z);
+        LocalVelocity -= new Vector3(LocalVelocity.x * parameters.Drag.x,
+            LocalVelocity.y * parameters.Drag.y,
+            LocalVelocity.z * parameters.Drag.z);
 
         Position += Rotation * LocalVelocity * dt;
     }

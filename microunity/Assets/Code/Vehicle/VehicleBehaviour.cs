@@ -1,15 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Vehicle : MonoBehaviour
+public class VehicleBehaviour : MonoBehaviour
 {
     public string prefabPath = "Prefabs/Car";
 
     private GameObject meshPrefab = null;
     private GameObject targetObject = null;
-    private Transform targetTransform = null;
 
-    public void Spawn(VehicleState state)
+    public void Setup()
     {
         if (meshPrefab == null)
         {
@@ -19,29 +18,21 @@ public class Vehicle : MonoBehaviour
         if (targetObject != null)
         {
             GameObject.Destroy(targetObject);
-
             targetObject = null;
-            targetTransform = null;
         }
 
         targetObject = GameObject.Instantiate(meshPrefab) as GameObject;
-        targetTransform = targetObject.GetComponent<Transform>();
 
-        targetTransform.position = state.Position;
-        targetTransform.rotation = state.Rotation;
+        Transform targetTransform = targetObject.GetComponent<Transform>();
+        targetTransform.parent = transform;
+        targetTransform.localPosition = Vector3.zero;
+        targetTransform.localRotation = Quaternion.identity;
+        targetTransform.localScale = Vector3.one;
     }
 
     public void SetState(VehicleState state)
     {
-        targetTransform.position = state.Position;
-        targetTransform.rotation = state.Rotation;
-    }
-
-    public Transform VehicleTransform
-    {
-        get
-        {
-            return targetTransform;
-        }
+        transform.position = state.Position;
+        transform.rotation = state.Rotation;
     }
 }

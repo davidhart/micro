@@ -6,13 +6,13 @@ public class CameraFollowTargets : MonoBehaviour
 
     public void Update()
     {
-        Vehicle[] vehicles = GameObject.FindObjectsOfType<Vehicle>();
+        VehicleBehaviour[] vehicles = GameObject.FindObjectsOfType<VehicleBehaviour>();
 
         Vector3 midPtAverage = Vector3.zero;
 
         for (int i = 0; i < vehicles.Length; ++i)
         {
-            Transform t = vehicles[i].VehicleTransform;
+            Transform t = vehicles[i].transform;
 
             if (t != null)
             {
