@@ -228,9 +228,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 609030888}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1890997e8a23a90478951b4666028243, type: 3}
+  m_Script: {fileID: 11500000, guid: 0ba1b596015e248eb80c312b2d64343a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  targetVehicles: {fileID: 174157935}
 --- !u!1001 &1048092510
 Prefab:
   m_ObjectHideFlags: 0

@@ -6,8 +6,13 @@ public class SessionVehicles : MonoBehaviour
 	public VehicleParameters VehicleParameters;
 	public VehicleBehaviour VehiclePrototype;
 
-    private List<VehicleBehaviour> Vehicles = new List<VehicleBehaviour>();
-    private List<BaseVehicleController> VehicleControllers = new List<BaseVehicleController>();
+    private List<VehicleBehaviour> vehicles = new List<VehicleBehaviour>();
+    private List<BaseVehicleController> vehicleControllers = new List<BaseVehicleController>();
+
+    public List<VehicleBehaviour> Vehicles
+    {
+        get { return vehicles; }
+    }
 
 	public void Start()
 	{
@@ -17,12 +22,12 @@ public class SessionVehicles : MonoBehaviour
         {
             // Setup for testing in scene only
             VehicleBehaviour vehicle = InstantiateVehicle();
-            Vehicles.Add(vehicle);
+            vehicles.Add(vehicle);
 
             LocalVehicleController vehicleController = new LocalVehicleController();
             vehicleController.Target = vehicle;
             vehicleController.Parameters = VehicleParameters;
-            VehicleControllers.Add(vehicleController);
+            vehicleControllers.Add(vehicleController);
 
             return;
         }
@@ -35,14 +40,14 @@ public class SessionVehicles : MonoBehaviour
 
             if (player == null)
             {
-                Vehicles.Add(null);
-                VehicleControllers.Add(null);
+                vehicles.Add(null);
+                vehicleControllers.Add(null);
 
                 continue; // empty slot;
             }
 
             VehicleBehaviour vehicle = InstantiateVehicle();
-            Vehicles.Add(vehicle);
+            vehicles.Add(vehicle);
 
             BaseVehicleController playerController = null;
 
@@ -57,7 +62,7 @@ public class SessionVehicles : MonoBehaviour
 
             playerController.Target = vehicle;
             playerController.Parameters = VehicleParameters;
-            VehicleControllers.Add(playerController);
+            vehicleControllers.Add(playerController);
 		}
 	}
 
@@ -74,12 +79,12 @@ public class SessionVehicles : MonoBehaviour
 
     public void Update()
     {
-        for (int i = 0; i < VehicleControllers.Count; ++i)
+        for (int i = 0; i < vehicleControllers.Count; ++i)
         {
-            if (VehicleControllers[i] == null)
+            if (vehicleControllers[i] == null)
                 continue;
 
-            VehicleControllers[i].Update();
+            vehicleControllers[i].Update();
         }
     }
 }

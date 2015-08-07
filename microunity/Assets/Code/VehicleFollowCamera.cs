@@ -1,18 +1,24 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
-public class CameraFollowTargets : MonoBehaviour
+public class VehicleFollowCamera : MonoBehaviour
 {
+    public SessionVehicles targetVehicles;
 
     public void Update()
     {
-        VehicleBehaviour[] vehicles = GameObject.FindObjectsOfType<VehicleBehaviour>();
-
         Vector3 midPtAverage = Vector3.zero;
 
-        for (int i = 0; i < vehicles.Length; ++i)
+        List<VehicleBehaviour> vehicles = targetVehicles.Vehicles;
+        int numActiveVehicles = 0;
+
+        for (int i = 0; i < vehicles.Count; ++i)
         {
+            if (vehicles[i] == null)
+                continue;
+
             Transform t = vehicles[i].transform;
+            numActiveVehicles++;
 
             if (t != null)
             {
@@ -20,9 +26,9 @@ public class CameraFollowTargets : MonoBehaviour
             }
         }
 
-        if (vehicles.Length > 0)
+        if (numActiveVehicles > 0)
         {
-            midPtAverage /= (float)vehicles.Length;
+            midPtAverage /= (float)numActiveVehicles;
 
             float height = transform.position.y;
 
