@@ -4,7 +4,3 @@ microunity/*.sln
 microunity/*.csproj
 microunity/obj/*
 *.suo
-3rdParty/Lidgren.Network/Lidgren.Network/bin
-3rdParty/Lidgren.Network/Lidgren.Network/obj
-3rdParty/Lidgren.Network/UnitTests/bin
-3rdParty/Lidgren.Network/UnitTests/obj
