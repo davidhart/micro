@@ -1,0 +1,3 @@
+[submodule "3rdParty/Lidgren.Network"]
+	path = 3rdParty/Lidgren.Network
+	url = git@github.com:davidhart/lidgren-network-gen3.git
