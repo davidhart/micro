@@ -2,5 +2,6 @@ microunity/Library/*
 microunity/Temp/*
 microunity/*.sln
 microunity/*.csproj
+microunity/*.csproj.user
 microunity/obj/*
 *.suo
