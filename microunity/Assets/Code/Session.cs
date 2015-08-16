@@ -21,7 +21,7 @@ public class Session : MonoBehaviour
     {
         get
         {
-            return client.Players.GetPlayer(client.RemoteUniqueIdentifier);
+            return client.LocalPlayer;
         }
     }
 

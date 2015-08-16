@@ -11,6 +11,7 @@ GameObject:
   - 33: {fileID: 3397340}
   - 65: {fileID: 6507198}
   - 23: {fileID: 2330904}
+  - 114: {fileID: 11415298}
   m_Layer: 0
   m_Name: Base
   m_TagString: Untagged
@@ -116,6 +117,7 @@ GameObject:
   - 33: {fileID: 3390754}
   - 65: {fileID: 6545802}
   - 23: {fileID: 2391908}
+  - 114: {fileID: 11422960}
   m_Layer: 0
   m_Name: Top
   m_TagString: Untagged
@@ -423,6 +425,28 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &11415298
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 107264}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 423f3b592ec8902459e5edbd7aa3c539, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &11422960
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 194412}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 423f3b592ec8902459e5edbd7aa3c539, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!136 &13602958
 CapsuleCollider:
   m_ObjectHideFlags: 1

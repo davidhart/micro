@@ -3,18 +3,18 @@ using System.Collections.Generic;
 
 namespace Gamemodes.Cars
 {
-    public class ServerGamemode : ServerGameMode
+    public class CarsServerGameMode : ServerGameMode
     {
-        private List<CarState> carSlots = new List<CarState>();
+        private List<VehicleNetworkState> carSlots = new List<VehicleNetworkState>();
 
-        public ServerGamemode(Server server)
+        public CarsServerGameMode(Server server)
             : base(server)
         {
             for (int i = 0; i < Server.Players.SlotsCount; ++i)
             {
                 RemotePlayer player = server.Players.GetPlayerInSlot(i);
 
-                CarState state = new CarState();
+                VehicleNetworkState state = new VehicleNetworkState();
 
                 carSlots.Add(state);
 
@@ -54,10 +54,9 @@ namespace Gamemodes.Cars
             if (player.PlayerSlot < 0)
                 return;
 
-            CarState state = carSlots[player.PlayerSlot];
+            VehicleNetworkState state = carSlots[player.PlayerSlot];
 
-            state.ReadPlayer(msg);
-            state.ReceiveTime = msg.ReceiveTime;
+            state.Read(msg);
         }
 
         public override void Update(float dt)
@@ -74,8 +73,8 @@ namespace Gamemodes.Cars
 
         private void SpawnPlayer(int slot, float positionX, float positionY, float rotation)
         {
-            CarState state = carSlots[slot];
-            state.Status = CarState.eStatus.Alive;
+            VehicleNetworkState state = carSlots[slot];
+            state.Status = VehicleNetworkState.eStatus.Alive;
             state.PositionX = positionX;
             state.PositionY = positionY;
             state.Rotation = rotation;
@@ -85,7 +84,7 @@ namespace Gamemodes.Cars
 
         private void KillPlayer(int slot)
         {
-            carSlots[slot].Status = CarState.eStatus.Dead;
+            carSlots[slot].Status = VehicleNetworkState.eStatus.Dead;
         }
 
         private NetOutgoingMessage CreateMessage(eCarsServerToClientMessage category)

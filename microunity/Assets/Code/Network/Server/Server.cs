@@ -240,6 +240,10 @@ public class Server
                 HandleLaunchGame(msg);
                 break;
 
+            case eClientToServerMessage.GameModeData:
+                HandleGamemodeData(msg);
+                break;
+
             default:
                 Log(string.Format("Unhandled message category {0}", cat));
                 break;
@@ -285,6 +289,12 @@ public class Server
         }
     }
 
+    private void HandleGamemodeData(NetIncomingMessage msg)
+    {
+        if (currentGameMode != null)
+            currentGameMode.HandleIncomingMessage(msg);
+    }
+
     public void DropClient(NetConnection connection, string message, params object[] args)
     {
         message = string.Format(message, args);
@@ -304,7 +314,7 @@ public class Server
         message.Write(name);
         server.SendToAll(message, null, NetDeliveryMethod.ReliableOrdered, 0);
 
-        currentGameMode = new Gamemodes.Cars.ServerGamemode(this);
+        currentGameMode = new Gamemodes.Cars.CarsServerGameMode(this);
     }
 
     public void Log(string message, params object[] args)

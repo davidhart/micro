@@ -8,7 +8,8 @@ public class VehicleBehaviour : MonoBehaviour
     private GameObject meshPrefab = null;
     private GameObject targetObject = null;
 
-    public void Setup()
+
+    public void Setup(Color vehicleColor)
     {
         if (meshPrefab == null)
         {
@@ -28,6 +29,13 @@ public class VehicleBehaviour : MonoBehaviour
         targetTransform.localPosition = Vector3.zero;
         targetTransform.localRotation = Quaternion.identity;
         targetTransform.localScale = Vector3.one;
+
+        VehicleColorModifier[] modifier = targetObject.GetComponentsInChildren<VehicleColorModifier>();
+
+        for (int i = 0; i < modifier.Length; ++i)
+        {
+            modifier[i].Setup(vehicleColor);
+        }
     }
 
     public void SetState(VehicleState state)

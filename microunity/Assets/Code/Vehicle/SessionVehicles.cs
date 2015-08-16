@@ -21,58 +21,68 @@ public class SessionVehicles : MonoBehaviour
         if (Session.Instance == null)
         {
             // Setup for testing in scene only
-            VehicleBehaviour vehicle = InstantiateVehicle();
-            vehicles.Add(vehicle);
-
-            LocalVehicleController vehicleController = new LocalVehicleController();
-            vehicleController.Target = vehicle;
-            vehicleController.Parameters = VehicleParameters;
-            vehicleControllers.Add(vehicleController);
-
-            return;
+            SetupVehicleSlots(1);
+            SpawnLocalVehicle(0);
         }
-
-		RemotePlayerSet players = Session.Instance.Players;
-
-		for (int i = 0; i < players.SlotsCount; ++i)
-		{
-			RemotePlayer player = players.GetPlayerInSlot(i);
-
-            if (player == null)
-            {
-                vehicles.Add(null);
-                vehicleControllers.Add(null);
-
-                continue; // empty slot;
-            }
-
-            VehicleBehaviour vehicle = InstantiateVehicle();
-            vehicles.Add(vehicle);
-
-            BaseVehicleController playerController = null;
-
-            if (player == Session.Instance.LocalPlayer)
-            {
-                playerController = new LocalVehicleController();
-            }
-            else
-            {
-                playerController = new RemoteVehicleController();
-            }
-
-            playerController.Target = vehicle;
-            playerController.Parameters = VehicleParameters;
-            vehicleControllers.Add(playerController);
-		}
 	}
 
-	public VehicleBehaviour InstantiateVehicle()
+    public void SetupVehicleSlots(int numSlots)
+    {
+        vehicles.Clear();
+        vehicleControllers.Clear();
+
+        for (int i = 0; i < numSlots; ++i)
+        {
+            vehicles.Add(null);
+            vehicleControllers.Add(null);
+        }
+    }
+
+    public void SpawnLocalVehicle(int slot)
+    {
+        SpawnVehicle(slot, new LocalVehicleController());
+    }
+
+    public void SpawnRemotevehicle(int slot)
+    {
+        SpawnVehicle(slot, new RemoteVehicleController());
+    }
+
+    private void SpawnVehicle(int slot, BaseVehicleController controller)
+    {
+        if (vehicles[slot] != null)
+        {
+            GameObject.Destroy(vehicles[slot]);
+        }
+
+        VehicleBehaviour vehicle = InstantiateVehicle(slot);
+        vehicles[slot] = vehicle;
+
+        controller.Target = vehicle;
+        controller.Parameters = VehicleParameters;
+        vehicleControllers[slot] = controller;
+    }
+
+    public VehicleState GetVehicleState(int slot)
+    {
+        return vehicleControllers[slot].GetState();
+    }
+
+    public void SetVehicleState(int slot, VehicleState state)
+    {
+        if (vehicleControllers[slot] == null)
+            return;
+
+        vehicleControllers[slot].HandleIncomingState(state);
+    }
+
+	public VehicleBehaviour InstantiateVehicle(int slot)
 	{
 		GameObject vehicleGo = GameObject.Instantiate(VehiclePrototype.gameObject) as GameObject;
 		vehicleGo.SetActive(true);
 
         VehicleBehaviour behaviour = vehicleGo.GetComponent<VehicleBehaviour>();
-        behaviour.Setup();
+        behaviour.Setup(PlayerIdentityGenerator.PlayerSlotToColor(slot));
 
         return behaviour;
 	}
@@ -84,7 +94,7 @@ public class SessionVehicles : MonoBehaviour
             if (vehicleControllers[i] == null)
                 continue;
 
-            vehicleControllers[i].Update();
+            vehicleControllers[i].Update(Time.deltaTime);
         }
     }
 }

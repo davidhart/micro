@@ -59,6 +59,14 @@ public class Client
         private set;
     }
 
+    public RemotePlayer LocalPlayer
+    {
+        get
+        {
+            return Players.GetPlayer(RemoteUniqueIdentifier);
+        }
+    }
+
     public long RemoteUniqueIdentifier
     {
         get
@@ -157,6 +165,9 @@ public class Client
             }
             client.Recycle(im);
         }
+
+        if (currentGameMode != null)
+            currentGameMode.Update();
     }
 
     public NetOutgoingMessage CreateMessage(eClientToServerMessage category)
@@ -343,5 +354,15 @@ public class Client
     {
         currentGameMode = gameMode;
         gameMode.OnAttachedToClient(this);
+    }
+
+    public void Send(NetOutgoingMessage message, NetDeliveryMethod method)
+    {
+        client.SendMessage(message, method);
+    }
+
+    public void Log(string output)
+    {
+        log(output);
     }
 }

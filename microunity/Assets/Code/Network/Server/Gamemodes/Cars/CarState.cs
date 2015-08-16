@@ -3,7 +3,7 @@
 namespace Gamemodes.Cars
 {
 
-    public class CarState
+    public class VehicleNetworkState
     {
         public enum eStatus
         {
@@ -24,8 +24,6 @@ namespace Gamemodes.Cars
         public float InputForward;
         public float InputBackward;
 
-        public double ReceiveTime = 0.0f;
-
         public void Write(NetOutgoingMessage msg)
         {
             msg.Write((byte)Status);
@@ -37,7 +35,6 @@ namespace Gamemodes.Cars
             msg.Write(InputTurn);
             msg.Write(InputForward);
             msg.Write(InputBackward);
-            msg.Write(ReceiveTime);
         }
 
         public void Read(NetIncomingMessage msg)
@@ -51,34 +48,6 @@ namespace Gamemodes.Cars
             InputTurn = msg.ReadFloat();
             InputForward = msg.ReadFloat();
             InputBackward = msg.ReadFloat();
-            ReceiveTime = msg.ReadDouble();
-        }
-
-        public void WritePlayer(NetIncomingMessage msg)
-        {
-            msg.Write((byte)Status);
-            msg.Write(PositionX);
-            msg.Write(PositionY);
-            msg.Write(Rotation);
-            msg.Write(LocalVelocityX);
-            msg.Write(LocalVelocityY);
-            msg.Write(InputTurn);
-            msg.Write(InputForward);
-            msg.Write(InputBackward);
-        }
-
-        public void ReadPlayer(NetIncomingMessage msg)
-        {
-            msg.Write((byte)Status);
-            msg.Write(PositionX);
-            msg.Write(PositionY);
-            msg.Write(Rotation);
-            msg.Write(LocalVelocityX);
-            msg.Write(LocalVelocityY);
-            msg.Write(InputTurn);
-            msg.Write(InputForward);
-            msg.Write(InputBackward);
-            ReceiveTime = msg.ReceiveTime;
         }
     }
 }

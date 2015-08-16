@@ -13,6 +13,11 @@ namespace Gamemodes
 
         public abstract void HandleIncomingMessage(NetIncomingMessage msg);
 
+        public virtual void Update()
+        {
+
+        }
+
         public NetOutgoingMessage CreateMessage()
         {
             NetOutgoingMessage message = Client.CreateMessage(eClientToServerMessage.GameModeData);
